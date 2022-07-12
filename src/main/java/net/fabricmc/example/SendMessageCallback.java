@@ -4,6 +4,9 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.util.ActionResult;
 
+import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
+
 public interface SendMessageCallback {
     Event<SendMessageCallback> EVENT = EventFactory.createArrayBacked(SendMessageCallback.class,(listiners)->(message)->{
         for(SendMessageCallback listener:listiners){
@@ -16,5 +19,5 @@ public interface SendMessageCallback {
         }
         return ActionResult.PASS;
     });
-    ActionResult interact(String message);
+    ActionResult interact(String message) throws URISyntaxException, NoSuchAlgorithmException;
 }

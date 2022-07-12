@@ -10,10 +10,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
+
 @Mixin(Screen.class)
 public class ChatMixin {
     @Inject(at = @At("HEAD"), method = "sendMessage",cancellable = true)
-    private void addMessage(String message,CallbackInfo info) {
+    private void addMessage(String message,CallbackInfo info) throws URISyntaxException, NoSuchAlgorithmException {
         ActionResult result = SendMessageCallback.EVENT.invoker().interact(message);
 
         if(result == ActionResult.FAIL) {

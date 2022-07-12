@@ -2,13 +2,21 @@ package net.fabricmc.example;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.network.C2SPacketTypeCallback;
+import net.minecraft.block.Block;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ClientChatListener;
 import net.minecraft.network.MessageType;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.JsonHelper;
+import org.java_websocket.handshake.ServerHandshake;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.UUID;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class ExampleMod implements ModInitializer {
 	// This logger is used to write text to the console and the log file.Ą
@@ -16,6 +24,15 @@ public class ExampleMod implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger("obeprivchat");
 	private boolean BlockMessages = false;
+	private MinecraftClient mc = MinecraftClient.getInstance();
+	private String token = "";
+	private String Websocketadress="wss://obechatgateway.herokuapp.com/";
+	private WebsocketClient ws=new WebsocketClient(new URI(Websocketadress),mc);
+	private boolean IsConnected = false;
+
+	public ExampleMod() throws URISyntaxException {
+	}
+
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -27,10 +44,75 @@ public class ExampleMod implements ModInitializer {
 			if(message.equals(".s")){
 				LOGGER.info("changed switch");
 				BlockMessages=!BlockMessages;
+				if(BlockMessages)
+					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§3Now your message are going to secret OBE server"),mc.player.getUuid());
+				else
+					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§4Now your message are going to bad admins of this server"),mc.player.getUuid());
+				return ActionResult.FAIL;
+			} else if (message.startsWith(".c")) {
+				String parsedmessage[]=message.split(" ");
+				if(ws.isOpen()){
+					ws.close(4100);
+				}
+				else
+					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§aTrying to connect to the server"),mc.player.getUuid());
+				ws = new WebsocketClient(new URI(Websocketadress),mc);
+				if(parsedmessage.length>1) {
+					ws.setToken(parsedmessage[1]);
+					token=parsedmessage[1];
+				}else
+					ws.setToken(token);
+
+				ws.connect();
+				return ActionResult.FAIL;
+			} else if (message.startsWith(".b")) {
+				if(ws.IsLoggined){
+					if(ws.IsModarator){
+						String parsedmessage[]=message.split(" ");
+						if(parsedmessage.length>1){
+						JSONObject payload = new JSONObject();
+						JSONObject payloaddata = new JSONObject();
+						payload.put("e",1);
+						payloaddata.put("username",parsedmessage[1]);
+						payload.put("data",payloaddata);
+						LOGGER.info("Sended to server: "+payload.toString());
+						ws.send(payload.toString());
+						}
+						else
+							mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§cNo username provided"),mc.player.getUuid());
+
+					}
+
+					else
+						mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§cYou are not moderator"),mc.player.getUuid());
+				}
+				else
+					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§cYou are not connected to the server"),mc.player.getUuid());
+				return ActionResult.FAIL;
+			} else if (message.startsWith(".g")) {
+				String parsedmessage[]=message.split(" ");
+				if(parsedmessage.length>1){
+					WebsocketClient testws = new WebsocketClient(new URI(Websocketadress),mc);
+					testws.setToken(parsedmessage[1]);
+					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§3Hash of your password: §f"+testws.token),mc.player.getUuid());
+				}
+				return ActionResult.FAIL;
 			}
 
-			if(BlockMessages)
+			if(BlockMessages) {
+				if(ws.IsLoggined){
+					JSONObject payload = new JSONObject();
+					JSONObject payloaddata = new JSONObject();
+					payload.put("e",2);
+					payloaddata.put("message",message);
+					payload.put("data",payloaddata);
+					LOGGER.info("Sended to server: "+payload.toString());
+					ws.send(payload.toString());
+				}
+				else
+					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§cYou are not connected so no one will see your message"),mc.player.getUuid());
 				return ActionResult.FAIL;
+			}
 			else
 				return ActionResult.PASS;
 
