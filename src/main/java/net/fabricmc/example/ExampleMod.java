@@ -1,6 +1,8 @@
 package net.fabricmc.example;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.example.config.ModConfigProvider;
+import net.fabricmc.example.config.ModConfigs;
 import net.fabricmc.fabric.api.event.network.C2SPacketTypeCallback;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
@@ -23,6 +25,7 @@ public class ExampleMod implements ModInitializer {
 	// It is considered best practice to use your mod id as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger("obeprivchat");
+	public static final String MOD_ID = "obeprivchat";
 	private boolean BlockMessages = false;
 	private MinecraftClient mc = MinecraftClient.getInstance();
 	private String token = "";
@@ -35,9 +38,11 @@ public class ExampleMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		ModConfigs.registerConfigs();
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
+		token = ModConfigs.TOKEN;
 		LOGGER.info("Obe Private Chat sucesffuly run");
 		SendMessageCallback.EVENT.register((message -> {
 			LOGGER.info("Recived Message: "+message);
@@ -89,7 +94,9 @@ public class ExampleMod implements ModInitializer {
 				else
 					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§cYou are not connected to the server"),mc.player.getUuid());
 				return ActionResult.FAIL;
-			} else if (message.startsWith(".g")) {
+			}
+			/**
+			else if (message.startsWith(".g")) {
 				String parsedmessage[]=message.split(" ");
 				if(parsedmessage.length>1){
 					WebsocketClient testws = new WebsocketClient(new URI(Websocketadress),mc);
@@ -98,6 +105,7 @@ public class ExampleMod implements ModInitializer {
 				}
 				return ActionResult.FAIL;
 			}
+			 **/
 
 			if(BlockMessages) {
 				if(ws.IsLoggined){

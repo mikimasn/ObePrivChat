@@ -127,9 +127,12 @@ public class WebsocketClient extends WebSocketClient {
 
     }
     public void setToken(String token) throws NoSuchAlgorithmException {
+        /*
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] encodedhash = digest.digest(
                 token.getBytes(StandardCharsets.UTF_8));
         this.token=bytesToHex(encodedhash);
+         */
+        this.token=token;
     }
 }
