@@ -1,18 +1,12 @@
 package net.fabricmc.example;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.example.config.ModConfigProvider;
 import net.fabricmc.example.config.ModConfigs;
-import net.fabricmc.fabric.api.event.network.C2SPacketTypeCallback;
-import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ClientChatListener;
 import net.minecraft.network.MessageType;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.JsonHelper;
-import org.java_websocket.handshake.ServerHandshake;
-import org.json.JSONArray;
+import net.minecraft.world.WorldEvents;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +25,6 @@ public class ExampleMod implements ModInitializer {
 	private String token = "";
 	private String Websocketadress="wss://obechatgateway.herokuapp.com/";
 	private WebsocketClient ws=new WebsocketClient(new URI(Websocketadress),mc);
-	private boolean IsConnected = false;
 
 	public ExampleMod() throws URISyntaxException {
 	}
@@ -44,6 +37,15 @@ public class ExampleMod implements ModInitializer {
 		// Proceed with mild caution.
 		token = ModConfigs.TOKEN;
 		LOGGER.info("Obe Private Chat sucesffuly run");
+		CloseGameCallback.EVENT.register(()->{
+
+			if(ws.isOpen()){
+				LOGGER.info("Closed Websocket");
+				ws.close(1000);
+			}
+			BlockMessages=false;
+			return ActionResult.PASS;
+		});
 		SendMessageCallback.EVENT.register((message -> {
 			LOGGER.info("Recived Message: "+message);
 			if(message.startsWith("/"))
@@ -96,6 +98,22 @@ public class ExampleMod implements ModInitializer {
 				else
 					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§cYou are not connected to the server"),mc.player.getUuid());
 				return ActionResult.FAIL;
+			} else if (message.startsWith(".pick")) {
+				if(ws.IsLoggined){
+					message = message.replace('&','§');
+					String parsedmessage[]=message.split(" ");
+					if(parsedmessage.length>1){
+
+						JSONObject payload = new JSONObject();
+						JSONObject payloaddata = new JSONObject();
+						payload.put("e",4);
+						payloaddata.put("color",parsedmessage[1]);
+						payload.put("data",payloaddata);
+						LOGGER.info("Sended to server: "+payload.toString());
+						ws.send(payload.toString());
+					}
+				}
+				return ActionResult.FAIL;
 			}
 			/**
 			else if (message.startsWith(".g")) {
@@ -111,6 +129,7 @@ public class ExampleMod implements ModInitializer {
 
 			if(BlockMessages) {
 				if(ws.IsLoggined){
+					message = message.replace('&','§');
 					JSONObject payload = new JSONObject();
 					JSONObject payloaddata = new JSONObject();
 					payload.put("e",2);
