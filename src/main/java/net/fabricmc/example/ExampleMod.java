@@ -46,6 +46,8 @@ public class ExampleMod implements ModInitializer {
 		LOGGER.info("Obe Private Chat sucesffuly run");
 		SendMessageCallback.EVENT.register((message -> {
 			LOGGER.info("Recived Message: "+message);
+			if(message.startsWith("/"))
+				return ActionResult.PASS;
 			if(message.equals(".s")){
 				LOGGER.info("changed switch");
 				BlockMessages=!BlockMessages;
