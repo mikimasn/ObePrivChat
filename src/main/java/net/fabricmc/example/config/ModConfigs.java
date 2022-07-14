@@ -9,9 +9,7 @@ public class ModConfigs {
     private static ModConfigProvider configs;
 
     public static String TOKEN;
-    public static int SOME_INT;
-    public static double SOME_DOUBLE;
-    public static int MAX_DAMAGE_DOWSING_ROD;
+    public static String PREFIX;
 
     public static void registerConfigs() {
         configs = new ModConfigProvider();
@@ -28,6 +26,7 @@ public class ModConfigs {
 
     private static void assignConfigs() {
         TOKEN = CONFIG.getOrDefault("key.security.token", "Token");
+        PREFIX = CONFIG.getOrDefault("key.preferences.prefix","!");
 
         ExampleMod.LOGGER.info("All " + configs.getConfigsList().size() + " have been set properly");
     }

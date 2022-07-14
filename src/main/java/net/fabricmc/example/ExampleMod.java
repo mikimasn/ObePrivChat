@@ -29,6 +29,7 @@ public class ExampleMod implements ModInitializer {
 	private String token = "";
 	private String Websocketadress="wss://obechatgateway.herokuapp.com/";
 	private WebsocketClient ws=new WebsocketClient(new URI(Websocketadress),mc);
+	private String prefix = "!";
 
 	public ExampleMod() throws URISyntaxException {
 	}
@@ -39,7 +40,7 @@ public class ExampleMod implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
-		token = ModConfigs.TOKEN;
+		prefix = ModConfigs.PREFIX;
 		LOGGER.info("Obe Private Chat sucesffuly run");
 		CloseGameCallback.EVENT.register(()->{
 
@@ -54,7 +55,7 @@ public class ExampleMod implements ModInitializer {
 			LOGGER.info("Recived Message: "+message);
 			if(message.startsWith("/"))
 				return ActionResult.PASS;
-			if(message.equals(".s")){
+			if(message.equals(prefix+"s")){
 				LOGGER.info("changed switch");
 				BlockMessages=!BlockMessages;
 				if(BlockMessages)
@@ -62,7 +63,7 @@ public class ExampleMod implements ModInitializer {
 				else
 					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§4Now your message are going to bad admins of this server"),mc.player.getUuid());
 				return ActionResult.FAIL;
-			} else if (message.startsWith(".c")) {
+			} else if (message.startsWith(prefix+"c")) {
 				String parsedmessage[]=message.split(" ");
 				if(ws.isOpen()){
 					ws.close(4100);
@@ -78,7 +79,7 @@ public class ExampleMod implements ModInitializer {
 
 				ws.connect();
 				return ActionResult.FAIL;
-			} else if (message.startsWith(".b")) {
+			} else if (message.startsWith(prefix+"b")) {
 				if(ws.IsLoggined){
 					if(ws.IsModarator){
 						String parsedmessage[]=message.split(" ");
@@ -102,7 +103,7 @@ public class ExampleMod implements ModInitializer {
 				else
 					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§cYou are not connected to the server"),mc.player.getUuid());
 				return ActionResult.FAIL;
-			} else if (message.startsWith(".pick")) {
+			} else if (message.startsWith(prefix+"pick")) {
 				if(ws.IsLoggined){
 					message = message.replace('&','§');
 					String parsedmessage[]=message.split(" ");
@@ -119,7 +120,7 @@ public class ExampleMod implements ModInitializer {
 				}
 				return ActionResult.FAIL;
 			}
-			else if(message.startsWith(".priv")){
+			else if(message.startsWith(prefix+"priv")){
 				if(ws.IsLoggined){
 					String parsedmessage[]=message.split(" ");
 					if(parsedmessage.length>1){
@@ -144,7 +145,7 @@ public class ExampleMod implements ModInitializer {
 
 				return ActionResult.FAIL;
 			}
-			else if(message.startsWith(".r")){
+			else if(message.startsWith(prefix+"r")){
 				if(ws.IsLoggined){
 					String parsedmessage[]=message.split(" ",2);
 					if(parsedmessage.length>1){
@@ -164,6 +165,13 @@ public class ExampleMod implements ModInitializer {
 
 
 				return ActionResult.FAIL;
+			}
+			else if(message.startsWith(prefix+"prefix")){
+				String parsedmessage[]=message.split(" ");
+				if(parsedmessage.length>1){
+					prefix = parsedmessage[1];
+					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§aYour prefix is now: "+prefix),mc.player.getUuid());
+				}
 			}
 			/**
 			else if (message.startsWith(".g")) {
