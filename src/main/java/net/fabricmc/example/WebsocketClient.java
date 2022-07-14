@@ -1,17 +1,14 @@
 package net.fabricmc.example;
 
-import com.google.gson.JsonObject;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.MessageType;
-import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.text.LiteralText;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.*;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,7 +16,7 @@ import java.util.TimerTask;
 public class WebsocketClient extends WebSocketClient {
     private MinecraftClient mc;
     public String token="Token";
-
+    public String[] LastPrivate = new String[0];
     public boolean IsLoggined=false;
     public boolean IsModarator;
     private static String bytesToHex(byte[] hash) {
@@ -120,6 +117,23 @@ public class WebsocketClient extends WebSocketClient {
             this.IsLoggined=true;
             this.IsModarator=userData.getBoolean("moderator");
         }
+        else if (event==5) {
+            JSONArray users = data.getJSONArray("users");
+            LastPrivate = new String[users.length()];
+            String usersString="";
+            for(int i=0;i<users.length();i++){
+                LastPrivate[i]=users.getString(i);
+                usersString+=" §c"+users.getString(i);
+                if(i+1!=users.length())
+                    usersString+=",";
+            }
+
+            ExampleMod.LOGGER.info("Recived Message: "+data.getString("message")+" Sended By: "+data.getString("message")+" To:"+usersString);
+            if(this.IsLoggined)
+                mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§c"+"["+data.getString("username")+" ->"+usersString+"] §f"+data.getString("message")),mc.player.getUuid());
+
+        }
+
 
     }
     @Override
