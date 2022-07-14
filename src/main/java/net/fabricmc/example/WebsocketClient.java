@@ -3,6 +3,7 @@ package net.fabricmc.example;
 import com.google.gson.JsonObject;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.MessageType;
+import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.text.LiteralText;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -95,14 +96,13 @@ public class WebsocketClient extends WebSocketClient {
         } else if (event==1) {
             ExampleMod.LOGGER.info("Recived user joined message: "+data.getString("username"));
             if(this.IsLoggined)
-                mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§bUser "+data.getString("color")+data.getString("username")+" §bjoined the chat"),mc.player.getUuid());
+                mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§bUser §e"+data.getString("username")+" §bjoined the chat"),mc.player.getUuid());
         } else if (event==2) {
             ExampleMod.LOGGER.info("Recived Message: "+data.getString("message")+" Sended By: "+data.getString("message"));
             if(this.IsLoggined)
                 mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText(data.getString("color")+"["+data.getString("username")+"] §f"+data.getString("message")),mc.player.getUuid());
 
         } else if (event==3) {
-            ExampleMod.LOGGER.info("Recived user left message: "+data.getString("username"));
             if(this.IsLoggined)
                 mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§bUser §e"+data.getString("username")+" §bleft the chat"),mc.player.getUuid());
         } else if (event==4) {
