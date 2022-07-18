@@ -12,7 +12,7 @@ import org.lwjgl.system.CallbackI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import oshi.jna.platform.mac.SystemB;
-
+import net.minecraft.network.PacketEncoder;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -26,10 +26,11 @@ public class ExampleMod implements ModInitializer {
 	private boolean BlockMessages = false;
 	private String PrivateChat[]=new String[0];
 	private MinecraftClient mc = MinecraftClient.getInstance();
+	TextParser textParser = new TextParser();
 	private String token = "";
-	private String Websocketadress="wss://obechatgateway.herokuapp.com/";
+	private String Websocketadress="ws://obechatgateway.herokuapp.com/";
 	private WebsocketClient ws=new WebsocketClient(new URI(Websocketadress),mc);
-	private String prefix = "!";
+	private String prefix = ".";
 
 	public ExampleMod() throws URISyntaxException {
 	}
@@ -41,6 +42,7 @@ public class ExampleMod implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		prefix = ModConfigs.PREFIX;
+		token = ModConfigs.TOKEN;
 		LOGGER.info("Obe Private Chat sucesffuly run");
 		CloseGameCallback.EVENT.register(()->{
 
@@ -79,7 +81,7 @@ public class ExampleMod implements ModInitializer {
 
 				ws.connect();
 				return ActionResult.FAIL;
-			} else if (message.startsWith(prefix+"b")) {
+			} else if (message.startsWith(prefix+"banmember")) {
 				if(ws.IsLoggined){
 					if(ws.IsModarator){
 						String parsedmessage[]=message.split(" ");
@@ -168,22 +170,13 @@ public class ExampleMod implements ModInitializer {
 			}
 			else if(message.startsWith(prefix+"prefix")){
 				String parsedmessage[]=message.split(" ");
+
 				if(parsedmessage.length>1){
 					prefix = parsedmessage[1];
 					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§aYour prefix is now: "+prefix),mc.player.getUuid());
 				}
-			}
-			/**
-			else if (message.startsWith(".g")) {
-				String parsedmessage[]=message.split(" ");
-				if(parsedmessage.length>1){
-					WebsocketClient testws = new WebsocketClient(new URI(Websocketadress),mc);
-					testws.setToken(parsedmessage[1]);
-					mc.inGameHud.addChatMessage(MessageType.SYSTEM,new LiteralText("§3Hash of your password: §f"+testws.token),mc.player.getUuid());
-				}
 				return ActionResult.FAIL;
 			}
-			 **/
 
 			if(BlockMessages) {
 				if(ws.IsLoggined){

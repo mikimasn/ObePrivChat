@@ -22,12 +22,12 @@ public class ModConfigs {
 
     private static void createConfigs() {
         configs.addKeyValuePair(new Pair<>("key.security.token", "Token"), "Token to ask api");
+        configs.addKeyValuePair(new Pair<>("key.preferences.prefix", "Prefix"), "Prefix to commands");
     }
 
     private static void assignConfigs() {
         TOKEN = CONFIG.getOrDefault("key.security.token", "Token");
-        PREFIX = CONFIG.getOrDefault("key.preferences.prefix","!");
-
+        PREFIX = CONFIG.getOrDefault("key.preferences.prefix",".");
         ExampleMod.LOGGER.info("All " + configs.getConfigsList().size() + " have been set properly");
     }
 }
