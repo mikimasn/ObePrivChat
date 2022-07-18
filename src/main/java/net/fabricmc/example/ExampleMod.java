@@ -179,7 +179,7 @@ public class ExampleMod implements ModInitializer {
 			}
 
 			if(BlockMessages) {
-				if(ws.IsLoggined){
+				if(ws.IsLoggined && ws.isOpen()){
 					message = message.replace('&','§');
 					JSONObject payload = new JSONObject();
 					JSONObject payloaddata = new JSONObject();
